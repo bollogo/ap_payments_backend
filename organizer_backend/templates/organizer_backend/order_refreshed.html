@@ -1,0 +1,47 @@
+{% extends 'organizer_backend/base.html' %}
+
+{% load util_filters %}
+
+{% load static %}
+
+{% block custom_styles %}
+<style>
+ .red {
+   background-color: red;
+ }
+
+ .ui.list > .item {
+   padding-top: 10px !important;
+   padding-bottom: 10px !important;
+ }
+
+ .ui.cards > .card, .ui.card {
+   width: 100%;
+ }
+
+ .page-header {
+   margin-bottom: 0px;
+ }
+ 
+</style>
+{% endblock %}
+
+{% block header %}
+<div class="page-header">
+  <h2>{{order.pickup_code}}</h2>
+  <p>Order Refreshed</p>
+</div>
+
+{% endblock %}
+
+{% block menu %}
+{% endblock %}
+
+{% block main_content %}
+
+<div>
+  Order was refreshed.
+</div>
+{% endblock %}
+
+

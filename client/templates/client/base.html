@@ -1,0 +1,32 @@
+{% load static %}
+
+<html>
+  <header>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+	<link rel="stylesheet" type="text/css" href="{% static 'organizer_backend/css/semantic.css' %}">
+
+	<script defer src="https://use.fontawesome.com/releases/v5.6.3/js/all.js" integrity="sha384-EIHISlAOj4zgYieurP0SdoiBYfGJKkgWedPHH4jCzpCXLmzVsw1ouK59MuUtP4a1" crossorigin="anonymous"></script>
+
+	<link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+	<link rel="stylesheet" type="text/css" href="{% static 'shop/css/main.css' %}">
+
+	<style>
+	 [v-cloak] {
+	   display: none !important;
+	 }
+	</style>
+
+	{% block custom_styles %}
+	{% endblock %}
+	<script src="{% static 'organizer_backend/js/jquery-3.3.1.min.js' %}" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="></script>
+	<script src="{% static 'organizer_backend/js/semantic.min.js' %}"></script>
+  </header>
+  <body>
+	{% block content %}
+	{% endblock %}
+	
+	{% block custom_scripts %}
+	{% endblock %}
+  </body>
+</html>

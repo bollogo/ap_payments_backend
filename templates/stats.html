@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block content %}
+   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      google.charts.load("current", {packages:["corechart"]});
+      google.charts.setOnLoadCallback(drawChart);
+      function drawChart() {
+        var data = google.visualization.arrayToDataTable([
+         ['Item', '# Sales'],
+		 {% for item in counts %}
+		 ['{{ item.label }}', {{ item.cnt }}],
+		 {% endfor %}
+        ]);
+
+        var options = {
+          title: 'Best-selling Items',
+          is3D: true,
+        };
+
+        var chart = new google.visualization.PieChart(document.getElementById('piechart_3d'));
+        chart.draw(data, options);
+      }
+    </script>
+
+  <h1>Event: Zusammen Leuchten 2019</h1>
+
+  <h2>Merchant: Vendor #1 (<code>{{ merchant | slice:":10" }}...{{ merchant | slice:"-6:" }}</code>)</h2>
+
+  <div id="piechart_3d" style="width:800px;height:400px;"></div>
+
+  <div class="card-group">
+	<div class="card text-white bg-primary mb-3 text-center" style="max-width: 18rem; margin-right:30px;">
+	  <div class="card-body">
+		<h5 class="card-title">Total Revenue</h5>
+		<p class="card-text" style="font-size:40px;">{{ total }} €</p>
+	  </div>
+	</div>
+	<div class="card text-white bg-primary mb-3 text-center" style="max-width: 18rem;">
+	  <div class="card-body">
+		<h5 class="card-title">Total # Sales</h5>
+		<p class="card-text" style="font-size:40px;">{{ total_count }}</p>
+	  </div>
+	</div>
+  </div>
+
+  <h4>Last Sales</h4>
+  <table class="table table-striped">
+	<tr class="table-primary">
+	  <th>Item</th>
+	  <th>Amount</th>
+	  <th>Buyer</th>
+	  <th>Status</th>
+	  <th>Date</th>
+	</tr>
+	{% for invoice in invoices|slice:"10" %}
+	  <tr>
+		<td>{{ invoice.label }}</td>
+		<td>{{ invoice.amount }}</td>
+		<td>{{ invoice.tx.source | slice:":10" }}...{{ invoice.tx.source | slice:"-6:" }}</td>
+		<td>
+		  {{ invoice.get_status_display }}
+		  {% if invoice.status == "successful" %}
+			(<a href="https://testnet.explorer.aepps.com/#/tx/{{ invoice.tx.tx_hash }}">
+			  {{ invoice.tx.tx_hash | slice:":8" }}...{{ invoice.tx.tx_hash | slice:"-6:" }}
+			</a>)
+		  {% endif %}
+		</td>
+		<td>{{ invoice.date_broadcast | naturaltime }}
+	  </tr>
+	{% endfor %}
+  </table>
+{% endblock content %}

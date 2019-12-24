@@ -1,0 +1,20 @@
+{% extends 'organizer_backend/base.html' %}
+
+{% block custom_scripts %}
+{{form.media}}
+{% endblock %}
+
+{% block content %}
+
+<h1>Create a new festival</h1>
+<form class="ui form" style="max-width:300px;" method="POST">
+  {% csrf_token %}
+  <div class="ui field">
+	{{form.name}}
+  </div>
+  <div class="ui field">
+	{{form.start_time}}
+  </div>
+  <input class="ui positive button" type="submit" value="Create Festival" />
+</form>
+{% endblock %}

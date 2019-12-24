@@ -1,0 +1,22 @@
+{% extends 'organizer_backend/base.html' %}
+
+{% load util_filters %}
+
+{% block custom_styles %}
+<style>
+ .container {
+   padding: 10px;
+ }
+</style>
+{% endblock %}
+
+{% block menu %}
+{% endblock %}
+
+{% block main_content %}
+<div class="container">
+  {% block content %}
+  {% endblock %}
+  <a href="https://cryptofest-app.rausgegangen.now.sh/">Weiter zur App</a>
+</div>
+{% endblock %}

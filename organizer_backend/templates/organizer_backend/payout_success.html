@@ -1,0 +1,35 @@
+{% extends 'organizer_backend/base.html' %}
+
+{% load util_filters %}
+
+{% load static %}
+
+{% block custom_styles %}
+<style>
+ .container {
+   padding: 10px;
+ }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="mint-app" class="container">
+  <div class="ui success message">
+	<i class="close icon"></i>
+	<div class="header">
+	  Auszahlung erfolgreich {{payout.amount|pretty_money}}
+	</div>
+	<p>
+	  Neuer Kontostand:
+	  <h1>{{payout.wallet.balance|pretty_money}}</h1>
+	</p>
+  </div>
+  <a class="ui green button" style="width:100%;" href="{% url 'payout' %}">Noch eine Auszahlung</a>
+  <div style="padding-top: 40px;">
+	<a class="ui button" style="width:100%;" href="{% url 'mint' %}">Ein Konto aufladen</a>
+  </div>
+</div>
+
+
+{% endblock %}
+

@@ -1,0 +1,122 @@
+{% extends 'organizer_backend/base.html' %}
+
+{% load util_filters %}
+
+{% load static %}
+
+{% block custom_styles %}
+<style>
+ .red {
+   background-color: red;
+ }
+
+ .ui.list > .item {
+   padding-top: 10px !important;
+   padding-bottom: 10px !important;
+ }
+</style>
+{% endblock %}
+
+{% block menu %}
+{% include 'organizer_backend/festival_menu.html' with active='users' %}
+{% endblock %}
+
+{% block content %}
+<div id="festival-users-app">
+  <table class="ui basic table">
+		<thead>
+			<tr>
+				<th>Email</th>
+				<th>Orders</th>
+				<th>Charges</th>
+				<th>Payouts</th>
+				<th>Created</th>
+				<th>Balance</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for user in users %}
+			<tr>
+				<td>{{user.email}}</td>
+				<td>{{user.wallet.orders.paid.count}}</td>
+				<td>{{user.wallet.charges.paid.count}}</td>
+				<td>{{user.wallet.payouts.count}}</td>
+				<td>{{user.date_created|rg_date_and_time}}</td>
+				<td><strong>{{user.wallet.balance|pretty_money}}</strong></td>
+			</tr>
+			
+			<!-- <div class="card" style="width:600px;" v-cloak>
+					 <div class="content">
+					 <div class="right floated header">{{user.wallet.balance|pretty_money}}</div>
+					 <div class="header">
+					 {{user.email}}
+					 </div>
+					 <div class="description">
+					 <div>{{user.wallet.charges.count}} Charges</div>
+					 <div>{{user.wallet.orders.count}} Orders</div>
+					 <a target="_blank" href="{{user.wallet.ae_explorer_url}}">{{user.wallet.pub_key}}</a>
+					 </div>
+					 </div>
+					 <div class="extra content">
+					 <div class="description">
+					 Since {{user.date_created}}
+					 </div>
+					 </div>
+					 </div> -->
+			{% endfor %}
+		</tbody>
+	</table>
+	{% include 'util/pagination.html' %}
+</div>
+
+</div>
+{% endblock %}
+
+
+{% block custom_scripts %}
+<script src="{% static 'organizer_backend/js/api.js' %}"></script>
+<script src="{% static 'organizer_backend/js/vue.js' %}"></script>
+<script src="{% static 'organizer_backend/js/vue_filters.js' %}"></script>
+<script src="{% static 'organizer_backend/js/uuid.js' %}"></script>
+<script src="{% static 'organizer_backend/js/lodash.min.js' %}"></script>
+<script src="{% static 'organizer_backend/js/date_fns.js' %}"></script>
+
+<script>
+ new Vue({
+   el: '#festival-users-app',
+   delimiters: ['[[', ']]'],
+   data: {
+	 users: {{users|jsonify}},
+	 wallet_amount: 20,
+	 step: 1,
+   },
+   mounted: function() {
+	 //setInterval(this.refresh.bind(this), 1000);
+   },
+   computed: {
+	 custom: function() {
+	   return this.color + '#';
+	 }
+   },
+   methods: {
+	 refresh: async function() {
+	   let updated = await API.get('/api/festivals/{{festival.id}}/dashboard');
+	   this.shops = updated.shops;
+	 },
+	 class_for_order: function(order) {
+	   if (order.status === 'paid') {
+		 return {'green': true};
+	   } else if (order.status === 'pending') {
+		 return {'orange': true};
+	   }
+	 },
+	 log: function() {
+	 },
+	 changeAmount: function(amount) {
+	   this.wallet_amount = amount;
+	 }
+   }
+ });
+</script>
+
+{% endblock %}

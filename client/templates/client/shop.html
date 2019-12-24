@@ -1,0 +1,72 @@
+{% extends 'client/base.html' %}
+
+{% load static %}
+{% load util_filters %}
+
+{% block content %}
+<div id="shop-app" >
+  <h1 style="padding-top:10px;text-align:center;">
+	{{shop.name}}
+  </h1>
+  <div>
+	<div v-for="product in shop.products" style="display:flex;flex-direction:row;justify-content:space-between;padding:3px 10px;">
+	  <div>[[product.count]] x</div>
+	  <div>[[product.name]]</div>
+	  <div>[[product.price|pretty_money]]</div>
+	  <div>
+		<div @click="decProductCount(product)" class="ui button">-</div>
+		<div @click="incProductCount(product)" class="ui button">+</div>
+	  </div>
+	</div>
+  </div>
+  <div style="padding-top:30px;flex-direction:column;display:flex;align-items:center;">
+	<h2>
+	  Warenkorb [[cart_amount_total|pretty_money]]
+	</h2>
+	<div @click="placeOrder" class="ui positive button">Jetzt bestellen</div>
+  </div>
+</div>
+{% endblock %}
+
+{% block custom_scripts %}
+<script src="{% static 'organizer_backend/js/api.js' %}"></script>
+<script src="{% static 'organizer_backend/js/vue.js' %}"></script>
+<script src="{% static 'organizer_backend/js/wallet.js' %}"></script>
+<script src="{% static 'organizer_backend/js/vue_filters.js' %}"></script>
+<script src="{% static 'organizer_backend/js/uuid.js' %}"></script>
+<script src="{% static 'organizer_backend/js/lodash.min.js' %}"></script>
+<script src="{% static 'organizer_backend/js/date_fns.js' %}"></script>
+
+<script>
+ let shop = {{shop.to_dict|jsonify}};
+ shop.products = _.map(shop.products, product => _.assign(product, {count: 0}));
+ new Vue({
+   el: '#shop-app',
+   delimiters: ['[[', ']]'],
+   data: {
+	 shop: shop
+   },
+   computed: {
+	 cart_amount_total: function() {
+	   return _.sumBy(this.shop.products, product => product.count * product.price);
+	 }
+   },
+   methods: {
+	 incProductCount(product) {
+	   if (!product.count) {
+		 product.count = 0
+	   }
+	   product.count++;
+	 },
+	 decProductCount(product) {
+	   product.count = Math.max(0, product.count-1);
+	 },
+	 placeOrder() {
+	   let {items, shop, pubkey: wallet.public_key};
+	   let order =  await api.post('api/orders/create', data);
+	 },
+   }
+ });
+</script>
+
+{% endblock %}

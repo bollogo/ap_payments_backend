@@ -1,0 +1,41 @@
+{% extends 'organizer_backend/base.html' %}
+
+{% block content %}
+<div class="ui items">
+  {% for festival in festivals %}
+  <div class="item">
+    <div class="content">
+	  <a href="{% url 'festival_edit' pk=festival.pk %}" class="header">{{festival.name}}</a>
+	  <div class="meta">
+        <span>Description</span>
+	  </div>
+	  <div class="description">
+        <p></p>
+	  </div>
+	  <div class="extra">
+        Additional Details
+	  </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="item">
+	<div class="image">
+
+	</div>
+	<div class="content">
+      <a class="header">No Festivals yet :(</a>
+      <div class="description">
+		<p>
+		  Add your first Festival now!
+		</p>
+      </div>
+	</div>
+  </div>
+  {% endfor %}
+  <div class="extra">
+    <a href="{% url 'festival_create' %}" class="ui right floated primary button">
+      Add new Festival +
+    </a>
+  </div>
+</div>
+{% endblock %}

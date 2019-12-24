@@ -1,0 +1,29 @@
+<div class="ui pagination menu">
+  {% if page_obj.has_previous %}
+  <a class="item" href="?page={{ page_obj.previous_page_number }}{% for f in filter.form %}{% if f.value %}&{{f.html_name}}={% if f.name == 'order' %}{{f.value.0}}{% else %}{{f.value}}{% endif %}{% endif %}{% endfor %}">&laquo;</a>
+  {% else %}
+  <div class="disabled item"><span>&laquo;</span></div>
+  {% endif %}
+
+  {% if page_obj.number|add:'-4' > 1 %}
+  <a class="item" href="?page={{ page_obj.number|add:'-5' }}{% for f in filter.form %}{% if f.value %}&{{f.html_name}}={% if f.name == 'order' %}{{f.value.0}}{% else %}{{f.value}}{% endif %}{% endif %}{% endfor %}">&hellip;</a>
+  {% endif %}
+  
+  {% for i in paginator.page_range %}
+  {% if page_obj.number == i %}
+  <div class="active item">{{ i }}</div>
+  {% elif i > page_obj.number|add:'-5' and i < page_obj.number|add:'5' %}
+  <a class="item" href="?page={{ i }}{% for f in filter.form %}{% if f.value %}&{{f.html_name}}={% if f.name == 'order' %}{{f.value.0}}{% else %}{{f.value}}{% endif %}{% endif %}{% endfor %}">{{ i }}</a>
+  {% endif %}
+  {% endfor %}
+
+  {% if page_obj.paginator.num_pages > page_obj.number|add:'4' %}
+  <a class="item" href="?page={{ page_obj.number|add:'5' }}{% for f in filter.form %}{% if f.value %}&{{f.html_name}}={% if f.name == 'order' %}{{f.value.0}}{% else %}{{f.value}}{% endif %}{% endif %}{% endfor %}">&hellip;</a></li>
+  {% endif %}
+  
+  {% if page_obj.has_next %}
+  <a class="item" href="?page={{ page_obj.next_page_number }}{% for f in filter.form %}{% if f.value %}&{{f.html_name}}={% if f.name == 'order' %}{{f.value.0}}{% else %}{{f.value}}{% endif %}{% endif %}{% endfor %}">&raquo;</a>
+  {% else %}
+  <div class="disabled item"><span>&raquo;</span></div>
+  {% endif %}
+</div>

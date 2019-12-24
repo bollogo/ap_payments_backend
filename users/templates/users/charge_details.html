@@ -1,0 +1,8 @@
+{% extends 'users/charge_base.html' %}
+
+{% load util_filters %}
+
+{% block content %}
+<h1>Deine Aufladung von {{charge.amount|pretty_money}} war erfolgreich.</h1>
+<h2>Dein neuer Kontostand beträgt {{charge.wallet.balance|pretty_money}}</h2>
+{% endblock %}

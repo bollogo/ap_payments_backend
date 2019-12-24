@@ -1,0 +1,54 @@
+{% extends 'organizer_backend/base.html' %}
+
+{% load util_filters %}
+
+{% load static %}
+
+{% block custom_styles %}
+<style>
+ .red {
+   background-color: red;
+ }
+
+ .ui.list > .item {
+   padding-top: 10px !important;
+   padding-bottom: 10px !important;
+ }
+</style>
+{% endblock %}
+
+{% block menu %}
+{% include 'organizer_backend/shop_menu.html' with active='orders' %}
+{% endblock %}
+
+{% block content %}
+<div id="shop-orders-app">
+	<h1>{{shop.name}}</h1>
+  <table class="ui basic table">
+		<thead>
+			<tr>
+				<th>Created</th>
+				<th>User</th>
+				<th>Items</th>
+				<th>Amount</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for order in orders %}
+			<tr>
+				<td>{{user.date_created|rg_date_and_time}}</td>				
+				<td>{{order.user.email}}</td>
+				<td>{{order.line_items.count}}</td>
+				<td><strong>{{order.total_amount|pretty_money}}</strong></td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+	{% include 'util/pagination.html' %}
+</div>
+
+</div>
+{% endblock %}
+
+{% block custom_scripts %}
+{% endblock %}

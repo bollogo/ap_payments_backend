@@ -1,0 +1,61 @@
+{% extends 'organizer_backend/base.html' %}
+
+{% load util_filters %}
+
+{% load static %}
+
+{% block custom_styles %}
+<style>
+ .container {
+   padding: 10px;
+ }
+</style>
+{% endblock %}
+
+{% block header %}
+<div class="page-header">
+  <h2>Auszahlung</h2>
+  <h4>{{wallet.pub_hash}}</h4>
+</div>
+
+{% endblock %}
+
+{% block content %}
+<div id="payout-app" class="container">
+  {% if form.errors %}
+  {% for field in form %}
+  {% for error in field.errors %}
+
+  <div class="alert alert-danger">
+	Name: {{field.name}}
+	<strong>{{ error|escape }}</strong>
+  </div>
+  {% endfor %}
+  {% endfor %}
+  {% for error in form.non_field_errors %}
+  <div class="alert alert-danger">
+	<strong>{{ error|escape }}</strong>
+  </div>
+  {% endfor %}
+  {% endif %}
+
+
+  <h2>Maximaler Auszahlungsbetrag: {{wallet.maximum_payout|pretty_money}} </h2>
+
+  <h3>Aufladungen Cash: {{wallet.sum_charges_cash|pretty_money}} </h3>
+  <h3>Aufladungen Paypal: {{wallet.sum_charges_paypal|pretty_money}}</h3>
+  <h3>Summe Käufe: {{wallet.sum_charges_orders_paid|pretty_money}}</h3>
+  
+  <form class="ui form" method="POST">
+	{% csrf_token %}
+	<div class="ui field">
+	  <label>Auszahlungsbetrag</label>
+	  {{form.amount}}
+	</div>
+	<input type="submit" style="width:100%;" class="ui orange button" value="Jetzt Auszahlen"/>
+  </form>
+</div>
+
+
+{% endblock %}
+

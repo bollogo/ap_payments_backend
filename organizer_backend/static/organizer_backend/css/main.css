@@ -1,0 +1,14 @@
+.page-header {
+	width: 100%;
+	padding: 20px;
+	text-align:center;
+	border-bottom: 1px solid black;
+	margin-bottom: 80px;
+	background-color: #58026d;
+	color: white;
+}
+
+.main {
+	max-width: 1300px;
+	margin:auto;
+}

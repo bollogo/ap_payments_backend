@@ -1,0 +1,207 @@
+{% extends 'organizer_backend/base.html' %}
+
+{% load util_filters %}
+
+{% load static %}
+
+{% block custom_styles %}
+<style>
+ .red {
+   background-color: red;
+ }
+
+ .ui.list > .item {
+   padding-top: 10px !important;
+   padding-bottom: 10px !important;
+ }
+
+ .ui.cards > .card, .ui.card {
+   width: 100%;
+ }
+
+ .page-header {
+   margin-bottom: 0px;
+ }
+ 
+</style>
+{% endblock %}
+
+{% block header %}
+<div class="page-header">
+  <h2>{{shop.name}}</h2>
+  <p>Fullfillment</p>
+</div>
+
+{% endblock %}
+
+{% block menu %}
+{% endblock %}
+
+{% block main_content %}
+<div id="shop-fulfillment-app">
+  <div class="ui cards">
+	<div class="card" v-cloak>
+	  <div class="content">
+		<div class="left floated header">
+		  [[unfulfilled_order_count]] open orders
+		</div>
+		<div class="right floated header">
+		  [[ready_order_count]] ready
+		</div>
+		<div style="clear:both" class="header">
+		  <div class="ui form">
+			<div class="ui action input">
+			  <input v-model="search"/>
+			  <button @click="search = ''" class="ui icon button">
+				Clear
+			  </button>
+			</div>
+		  </div>
+		</div>
+		<div class="ui relaxed divided list">
+		  <div class="item" style="padding-bottom:4px !important;padding-top:14px !important;" >
+			<div class="content" >
+			  <div class="header" style="color:#ddd !important;font-size:11px;" v-if="orders.length">
+				RECENT ORDERS
+			  </div>
+			  <div class="header" style="color:#ddd !important;font-size:11px;" v-else>
+				NO RECENT ORDERS
+			  </div>
+			</div>
+		  </div>
+		  <div v-for="order in filteredOrders" class="item">
+			<div class="content">
+			  <div class="header" style="font-size:20px;">[[order.pickup_code]]</div>
+			  <div class="description" style="margin-bottom:4px;">Placed [[order.date_created|time_ago]] ago</div>
+
+			  <div class="right floated header">
+				<div>[[order.total_amount|pretty_money]]</div>
+				<a :href="'/organizer-backend/orders/'+order.id+'/refresh'" class="ui mini label" :class="class_for_order(order)" style="display:block;text-transform:uppercase;">[[order.status]]</a>
+			  </div>
+			  <div v-for="line_item in order.line_items" class="header">
+				<img :src="'{% static 'organizer_backend/themes/default/icons/' %}' + line_item.product_icon" style="width:auto;height:16px;"/>
+				[[line_item.count]] [[line_item.product_name]]
+  </a>
+			  </div>
+			</div>
+			<div class="extra" style="margin-top:20px;">
+			  <button @click="setReady(order)" class="ui left floated basic teal button" v-if="order.status == 'paid'">
+				set ready
+			  </button>
+			  <button @click="setSuccess(order)" class="ui left floated basic teal button" v-if="order.status == 'ready'">
+				set delivered
+			  </button>
+			</div>
+			<div class="extra" style="margin-bottom:4px;word-break: break-all;">
+			  <a target="_blank" :href="'https://testnet.explorer.aepps.com/#/tx/' + order.tx_hash">[[order.tx_hash]]</a>
+			</div>
+		  </div>
+		</div>
+	  </div>
+	</div>
+  </div>
+</div>
+
+</div>
+{% endblock %}
+
+
+{% block custom_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/fetch-polyfill@0.8.2/fetch.min.js"></script>
+<script src="{% static 'organizer_backend/js/api.js' %}"></script>
+<script src="{% static 'organizer_backend/js/vue.js' %}"></script>
+<script src="{% static 'organizer_backend/js/vue_filters.js' %}"></script>
+<script src="{% static 'organizer_backend/js/uuid.js' %}"></script>
+<script src="{% static 'organizer_backend/js/lodash.min.js' %}"></script>
+<script src="{% static 'organizer_backend/js/date_fns.js' %}"></script>
+
+<script type="text/x-template" id="ap-money-template">
+ <div>
+ <h1>My Component [[mycustomer.firstname]] €</h1>
+ <input v-model="mycustomer.firstname" />
+ <input v-model="mycustomer.lastname"/>
+ <button @click="$emit('save', mycustomer)">SAVE</button>
+ </div>
+</script>
+
+<script>
+ Vue.component('ap-money', {
+   delimiters: ['[[', ']]'],
+   props: ['initial'],
+   template: '#ap-money-template',
+   data: function() {
+	 return {
+	   mycustomer: _.clone(this.initial)
+	 };
+   },
+   watch: {
+	 initial: function(val) {
+	   console.log('changed above');
+	   this.mycustomer = _.clone(val);
+	 }
+   }
+ });
+ 
+ new Vue({
+   el: '#shop-fulfillment-app',
+   delimiters: ['[[', ']]'],
+   data: {
+	 shop: {},
+	 unfulfilled_order_count: {{shop.unfulfilled_order_count|jsonify}},
+	 ready_order_count: {{shop.ready_order_count|jsonify}},
+	 orders: {{shop.orders_to_fulfill.to_dict|jsonify}},
+	 search: '',
+   },
+   mounted: function() {
+	 setInterval(this.refresh.bind(this), 1000);
+   },
+   computed: {
+	 filteredOrders: function() {
+	   if (!this.search) {
+		 return this.orders;
+	   }
+	   return _.filter(this.orders, function(order) {return _.includes(order.pickup_code, this.search)}.bind(this));
+	 },
+	 custom: function() {
+	   return this.color + '#';
+	 }
+   },
+   methods: {
+	 refresh: function() {
+	   API.get('/api/shops/{{shop.id}}/fulfillment')
+		  .then(function(updated) {;
+			this.orders = updated.orders;
+			this.unfulfilled_order_count = updated.unfulfilled_order_count;
+			this.ready_order_count = updated.ready_order_count;
+		  }.bind(this));
+	 },
+	 class_for_order: function(order) {
+	   if (order.status === 'paid') {
+		 return {'teal': true};
+	   } else if (order.status === 'ready') {
+		 return {'blue': true};
+	   } else if (order.status == 'success') {
+		 return {'green': true};
+	   } else if (order.status === 'pending') {
+		 return {'orange': true};
+	   }
+	 },
+	 setReady: function (order) {
+	   order.status = 'ready'
+	   var resp = API.post('/api/orders/' + order.id + '/ready')
+					 .then(function(resp) {
+					   order.status == resp.status
+					 });
+	 },
+	 setSuccess: function (order) {
+	   order.status = 'success'
+	   var resp = API.post('/api/orders/' + order.id + '/success')
+					 .then(function(resp) {
+					   order.status == resp.status
+					 });
+	 }
+   }
+ });
+</script>
+
+{% endblock %}

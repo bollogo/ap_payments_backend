@@ -1,0 +1,189 @@
+{% extends 'organizer_backend/base.html' %}
+
+{% load util_filters %}
+
+{% load static %}
+
+{% block custom_styles %}
+<style>
+ .red {
+   background-color: red;
+ }
+
+ .ui.list > .item {
+   padding-top: 10px !important;
+   padding-bottom: 10px !important;
+ }
+</style>
+{% endblock %}
+
+{% block menu %}
+{% include 'organizer_backend/festival_menu.html' with active='dashboard' %}
+{% endblock %}
+
+{% block content %}
+<div id="festival-dashboard-app">
+
+  <div class="ui cards">
+	<div class="ui card">
+	  Cash: {{festival.charges.cash.total_amount|pretty_money}}
+	  Paypal: {{festival.charges.paypal.total_amount|pretty_money}}
+	</div>
+  </div>
+
+  <div class="ui cards">
+	<div class="ui card">
+	  Payout: {{festival.payouts.total_amount|pretty_money}}
+	</div>
+  </div>
+
+  <div class="ui cards">
+	<div class="ui card">
+	  {% for shop in festival.shops.all %}
+	  <div>
+		<h3>{{shop.name}}</h3>
+		{% for product in shop.products.all %}
+		<div>
+		  {{product.name}}: {{product.total_revenue|pretty_money}}
+		</div>
+		{% endfor %}
+	  </div>
+	  {% endfor %}
+	</div>
+  </div>
+
+  <div class="ui cards">
+	<div v-for="shop in shops" class="card" style="width:600px;" v-cloak>
+	  <div class="content">
+		<div class="right floated header">[[shop.revenue|pretty_money]]</div>
+		<div class="header">
+		  [[shop.name]]
+		</div>
+		<div class="ui relaxed divided list">
+		  <div class="item" style="padding-bottom:4px !important;" >
+			<div class="content" >
+			  <div class="header" style="color:#ddd !important;font-size:11px;" v-if="shop.recent_orders.length">
+				RECENT ORDERS
+			  </div>
+			  <div class="header" style="color:#ddd !important;font-size:11px;" v-else>
+				NO RECENT ORDERS
+			  </div>
+			</div>
+		  </div>
+		  <div v-for="order in shop.recent_orders" class="item">
+			<div class="content">
+			  <div class="description" style="margin-bottom:4px;">Placed [[order.date_created|time_ago]] ago</div>
+			  <div class="right floated header">
+				<div>[[order.total_amount|pretty_money]]</div>
+				<div class="ui mini label" :class="class_for_order(order)" style="text-transform:uppercase;">[[order.status]]</div>
+			  </div>
+			  <div v-for="line_item in order.line_items" class="header">
+				<img :src="'{% static 'organizer_backend/themes/default/icons/' %}' + line_item.product_icon" style="width:auto;height:16px;"/>
+				[[line_item.count]] [[line_item.product_name]]
+			  </div>
+			</div>
+  			<div class="extra" style="margin-bottom:4px;word-break: break-all;">
+			  <a target="_blank" :href="'https://testnet.explorer.aepps.com/#/tx/' + order.tx_hash">[[order.tx_hash]]</a>
+			</div>
+		  </div>
+		</div>
+	  </div>
+	  <div class="extra content">
+		<div class="description">
+		  [[shop.revenue_last_hour|pretty_money]] in last hour
+		</div>
+		<div class="description">
+		  [[shop.order_count]] orders total
+		</div>
+	  </div>
+	</div>
+  </div>
+  </div>
+
+</div>
+{% endblock %}
+
+
+{% block custom_scripts %}
+<script src="{% static 'organizer_backend/js/api.js' %}"></script>
+<script src="{% static 'organizer_backend/js/vue.js' %}"></script>
+<script src="{% static 'organizer_backend/js/vue_filters.js' %}"></script>
+<script src="{% static 'organizer_backend/js/uuid.js' %}"></script>
+<script src="{% static 'organizer_backend/js/lodash.min.js' %}"></script>
+<script src="{% static 'organizer_backend/js/date_fns.js' %}"></script>
+
+<script type="text/x-template" id="ap-money-template">
+ <div>
+   <h1>My Component [[mycustomer.firstname]] €</h1>
+   <input v-model="mycustomer.firstname" />
+   <input v-model="mycustomer.lastname"/>
+   <button @click="$emit('save', mycustomer)">SAVE</button>
+ </div>
+</script>
+
+<script>
+ Vue.component('ap-money', {
+   delimiters: ['[[', ']]'],
+   props: ['initial'],
+   template: '#ap-money-template',
+   data: function() {
+	 return {
+	   mycustomer: _.clone(this.initial)
+	 };
+   },
+   watch: {
+	 initial: function(val) {
+	   console.log('changed above');
+	   this.mycustomer = _.clone(val);
+	 }
+   }
+ });
+ 
+ new Vue({
+   el: '#festival-dashboard-app',
+   delimiters: ['[[', ']]'],
+   data: {
+	 shops: {{festival.shops.all|jsonify}},
+	 name: 'my name',
+	 color: 'red',
+	 wallet_amount: 20,
+	 step: 1,
+	 customer: {
+	   firstname: 'Hendi',
+	   lastname: 'Richter',
+	   age: 30,
+	 }
+   },
+   mounted: function() {
+	 setInterval(this.refresh.bind(this), 1000);
+   },
+   computed: {
+	 custom: function() {
+	   return this.color + '#';
+	 }
+   },
+   methods: {
+	 refresh: async function() {
+	   let updated = await API.get('/api/festivals/{{festival.id}}/dashboard');
+	   this.shops = updated.shops;
+	 },
+	 class_for_order: function(order) {
+	   if (order.status === 'paid') {
+		 return {'green': true};
+	   } else if (order.status === 'pending') {
+		 return {'orange': true};
+	   }
+	 },
+	 log: function() {
+	 },
+	 saveCustomer: function(data) {
+	   this.customer = _.clone(data);
+	 },
+	 changeAmount: function(amount) {
+	   this.wallet_amount = amount;
+	 }
+   }
+ });
+</script>
+
+{% endblock %}

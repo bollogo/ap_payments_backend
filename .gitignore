@@ -1,0 +1,13 @@
+*tar.gz
+*.sqlite3
+*.org
+*~
+*#*
+\#*
+*.json
+*.git
+pip.freeze
+*.sh
+*.pyc
+__pycache__
+*.environment

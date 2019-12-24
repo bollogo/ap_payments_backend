@@ -1,0 +1,33 @@
+{% extends 'organizer_backend/base.html' %}
+
+{% load util_filters %}
+
+{% load static %}
+
+{% block custom_styles %}
+<style>
+ .container {
+   padding: 10px;
+ }
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="mint-app" class="container">
+  <div class="ui success message">
+	<i class="close icon"></i>
+	<div class="header">
+	  Konto erfolgreich aufgeladen
+	</div>
+	<p>
+	  Neuer Kontostand:
+	  <h1>{{wallet.balance|pretty_money}}</h1>
+	</p>
+  </div>
+  <a class="ui button" style="width:100%;" href="{% url 'mint' %}">Weiteres Konto aufladen</a>
+</div>
+
+
+{% endblock %}
+

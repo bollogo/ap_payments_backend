@@ -1,0 +1,49 @@
+{% extends 'organizer_backend/base_public.html' %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="ui segment" style="max-width:400px;margin:auto;">
+  <h2>Willkommen</h2>
+  <form method="post" class="ui form">
+	{% csrf_token %}
+
+	{% if form.errors %}
+	{% for field in form %}
+	{% for error in field.errors %}
+	<div class="alert alert-danger">
+	  Name: {{field.name}}
+	  <strong>{{ error|escape }}</strong>
+	</div>
+	{% endfor %}
+	{% endfor %}
+	{% for error in form.non_field_errors %}
+	<div class="alert alert-danger">
+	  <strong>{{ error|escape }}</strong>
+	</div>
+	{% endfor %}
+	{% endif %}
+
+	<div class="field">
+      <label>Email oder Nutzername</label>
+	  {{form.username}}
+	</div>
+
+	<div class="field">
+      <label>Passwort</label>
+	  {{form.password}}
+	</div>
+
+	<button class="ui orange button" type="submit">Einloggen</button>
+
+	{% comment %}
+	<a href="{% url 'social:begin' 'facebook' %}">Login with Facebook</a><br>
+
+	<div style="margin-top:8px;padding-left:4px;">
+	  <a style="font-size:12px;" href="{% url 'password_reset' %}">Passwort vergessen?</a>
+	</div>
+	{% endcomment %}
+
+  </form>
+</div>
+{% endblock %}

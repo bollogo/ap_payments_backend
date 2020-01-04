@@ -1,0 +1,13 @@
+{% extends 'organizer_backend/base_public.html' %}
+
+{% block title %}Logout{% endblock %}
+
+{% block content %}
+<div class="ui segment" style="max-width:400px;margin:auto;">
+  <h2>Logged out</h2>
+	<p>Thank you for visiting AP Payments,<br>See you soon!</p>
+	<div style="margin-top:8px;padding-left:4px;">
+		<a style="font-size:12px;" href="{% url 'login' %}">back to login</a>
+	</div>
+</div>
+{% endblock %}

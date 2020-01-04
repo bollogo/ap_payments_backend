@@ -1,0 +1,21 @@
+{% extends 'organizer_backend/base.html' %}
+
+{% load util_filters %}
+{% load static %}
+
+
+{% block menu %}
+{% include 'organizer_backend/festival_menu.html' with active='distribution' %}
+{% endblock %}
+
+{% block content %}
+<div id="festival-dashboard-app">
+	<h1>Distribution</h1>
+  <div class="ui cards">
+		<div class="ui card">
+			Cash: {{festival.charges.cash.total_amount|pretty_money}}
+			Paypal: {{festival.charges.paypal.total_amount|pretty_money}}
+		</div>
+  </div>
+</div>
+{% endblock %}

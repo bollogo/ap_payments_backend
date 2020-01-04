@@ -40,24 +40,28 @@
  
  .store-block {
    min-width:45%;
-   border: 1px dashed #bbb;
+   border: 1px dashed rgba(80, 17, 105, 0.4);
    border-radius: 5px;
    flex: 1;
-   height: 320px;
    margin: 8px;
    position: relative;
  }
 
  .store-block:hover {
-   border: 1px dashed black;
+   border: 1px dashed rgb(80, 17, 105);
  }
 
  .store-block .title {
    padding: 10px;
    font-size: 18px;
    font-weight: bold;
-   background-color: #8805a8;
-   color: white;
+	 background-color: rgba(124, 33, 162, 0.1);
+   color: #58026d;
+ }
+ 
+ .store-block .title > a {
+	 font-size: 10px;
+   color: #58026d;
  }
 
  .content {
@@ -95,29 +99,29 @@
 {% endblock %}
 
 {% block content %}
-
-<h1>{{festival.name}}</h1>
 <div id="myshopapp">
+	<h1>{{festival.name}} - Shops</h1>
   <div class="store-row">
-	<div v-for="shop in shops" class="store-block">
-	  <div class="title">
-		<ap-edit name="name" :object="shop"></ap-edit>
-		<a :href="shop.fulfillment_url" style="font-size:10px;color:white;">to fullfillment</a>
-	  </div>
-	  <div class="content">
-		<div class="product" v-for="product in shop.products">
-		  <ap-edit width="30px" name="icon" :object="product"></ap-edit>
-		  <ap-edit width="30px" name="price" :object="product"></ap-edit> € -  <ap-edit width="80px" name="name" :object="product"></ap-edit>
-		  <div class="ui tiny basic negative icon button" @click="deleteProduct(shop, product)"><i class="ui icon trash"></i></div>
+		<div v-for="shop in shops" class="store-block">
+			<div class="title">
+				<ap-edit name="name" :object="shop"></ap-edit>
+				<a :href="shop.fulfillment_url">to fullfillment</a>
+				<a @click="deleteShop(shop.id)">delete Shop</a>
+			</div>
+			<div class="content">
+				<div class="product" v-for="product in shop.products">
+					<ap-edit width="30px" name="icon" :object="product"></ap-edit>
+					<ap-edit width="30px" name="price" :object="product"></ap-edit> € -  <ap-edit width="80px" name="name" :object="product"></ap-edit>
+					<div class="ui tiny basic negative icon button" @click="deleteProduct(shop, product)"><i class="ui icon trash"></i></div>
+				</div>
+				<div class="ui button" @click="addProduct(shop)">+ add Product</div>
+			</div>
 		</div>
-		<div class="ui button" @click="addProduct(shop)">+ add Product</div>
-	  </div>
-	</div>
-	<div v-for="shop in empty_shops" @click="addShop()" class="store-block" style="display:flex;align-items:center;justify-content:center;">
-	  <div style="cursor:pointer;">
-		+ add Shop
-	  </div>
-	</div>
+		<div v-for="shop in empty_shops" @click="addShop()" class="store-block" style="display:flex;align-items:center;justify-content:center;">
+			<div style="cursor:pointer;">
+				+ add Shop
+			</div>
+		</div>
   </div>
 </div>
 {% endblock %}
@@ -129,10 +133,10 @@
 
 
 <script type="text/x-template" id="ap-edit-template">
-  <div @click="startEditing()" :style="{width:width}">
-  <div v-if="!edit" style="width:100%;" class="ui">[[value]]</div>
-  <input v-else style="width:100%;" @blur="edit=false" ref="myinput" class="simple-input" v-on:keyup.enter="edit=false" v-model="object[name]"/>
-  </div>
+ <div @click="startEditing()" :style="{width:width}">
+ <div v-if="!edit" style="width:100%;" class="ui">[[value]]</div>
+ <input v-else style="width:100%;" @blur="edit=false" ref="myinput" class="simple-input" v-on:keyup.enter="edit=false" v-model="object[name]"/>
+ </div>
 </script>
 
 <script src="{% static 'organizer_backend/js/lodash.min.js' %}"></script>
@@ -142,25 +146,25 @@
    props: ['name', 'object', 'width'],
    template: '#ap-edit-template',
    data: function() {
-	 return {
-	   edit: false,
-	 };
+		 return {
+			 edit: false,
+		 };
    },
    computed: {
-	 value: function() {
-	   return this.object[this.name];
-	 },
-	 component: function() {
-	   return this.edit ? 'input' : 'div';
-	 }
+		 value: function() {
+			 return this.object[this.name];
+		 },
+		 component: function() {
+			 return this.edit ? 'input' : 'div';
+		 }
    },
    methods: {
-	 startEditing: function() {
-	   this.edit = true;
-	   setTimeout(function() {
-		 this.$refs.myinput.focus();
-	   }.bind(this));
-	 }
+		 startEditing: function() {
+			 this.edit = true;
+			 setTimeout(function() {
+				 this.$refs.myinput.focus();
+			 }.bind(this));
+		 }
    }
  });
  
@@ -168,65 +172,72 @@
    delimiters: ['[[', ']]'],
    el: '#myshopapp',
    data: {
-	 shops: [
-	   {% for shop in festival.shops.all %}
-	   {
-		 id: '{{shop.id}}',
-		 name: '{{shop.name|escapejs}}',
-		 fulfillment_url: "{% url 'shop_fulfillment' pk=shop.pk %}",
-		 products: [
-		   {% for product in shop.products.all %}
-		   {
-			 id: '{{product.id|escapejs}}',
-			 name: '{{product.name|escapejs}}',
-			 price: {{product.price_euro|escapejs}},
-			 icon: "{% if not product.icon %}no icon{% else %}{{product.icon}}{% endif %}",
-		   },
-		   {% endfor %}
+		 shops: [
+			 {% for shop in festival.shops.all %}
+			 {
+				 id: '{{shop.id}}',
+				 name: '{{shop.name|escapejs}}',
+				 fulfillment_url: "{% url 'shop_fulfillment' pk=shop.pk %}",
+				 products: [
+					 {% for product in shop.products.all %}
+					 {
+						 id: '{{product.id|escapejs}}',
+						 name: '{{product.name|escapejs}}',
+						 price: {{product.price_euro|escapejs}},
+						 icon: "{% if not product.icon %}no icon{% else %}{{product.icon}}{% endif %}",
+					 },
+					 {% endfor %}
+				 ]
+			 },
+			 {% endfor %}
 		 ]
-	   },
-	   {% endfor %}
-	 ]
    },
    computed: {
-	 empty_shops: function() {
-	   return _.range(2 - this.shops.length);
-	 }
+		 empty_shops: function() {
+			 return _.range(4 - this.shops.length);
+		 }
    },
    created: function() {
    },
    watch: {
-	 shops: {
-	   handler: function() {
-		 API.post(
-		   '/api/festivals/' + '{{festival.pk|escapejs}}' + '/shops/update',
-		   this.shops
-		 );
-	   },
-	   deep: true
-	 }
+		 shops: {
+			 handler: function() {
+				 API.post(
+					 '/api/festivals/' + '{{festival.pk|escapejs}}' + '/shops/update',
+					 this.shops
+				 );
+			 },
+			 deep: true
+		 }
    },
    methods: {
-	 addShop: function() {
-	   this.shops.push({
-		 id: uuidv4(),		 
-		 name: 'My Shop',
-		 products: []
-	   });
-	 },
-	 addProduct: function(shop) {
-	   shop.products.push({
-		 id: uuidv4(),
-		 name: 'Name',
-		 price: 100
-	   });
-	 },
-	 deleteProduct: function(shop, product) {
-	   console.log('shop', shop);
-	   console.log('product', product);
-	   _.remove(shop.products, product);
-	   shop.products = _.clone(shop.products);
-	 }
+		 addShop: function() {
+			 this.shops.push({
+				 id: uuidv4(),		 
+				 name: 'My Shop',
+				 products: []
+			 });
+		 },
+		 deleteShop: function(id) {
+			 console.log('SHOP DELETE');
+			 _.remove(this.shops, function(shop) {
+				 return shop.id == id;
+			 });
+			 this.shops = _.clone(this.shops);
+		 },
+		 addProduct: function(shop) {
+			 shop.products.push({
+				 id: uuidv4(),
+				 name: 'Name',
+				 price: 100
+			 });
+		 },
+		 deleteProduct: function(shop, product) {
+			 console.log('shop', shop);
+			 console.log('product', product);
+			 _.remove(shop.products, product);
+			 shop.products = _.clone(shop.products);
+		 }
    }
  });
 </script>

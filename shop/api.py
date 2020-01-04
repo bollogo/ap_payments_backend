@@ -14,6 +14,7 @@ from util.helper import from_ap, to_ap
 from decimal import Decimal
 from users.exceptions import InvalidVoucherException, NotEnoughFunds
 from .serializers import LineItemSerializer, ProductSerializer, ShopSerializer, OrderSerializer
+from festival.serializers import FestivalSerializer
 from users.serializers import ChargeSerializer
 from django.utils import timezone
 from django.utils.crypto import get_random_string
@@ -27,6 +28,23 @@ class APIShopListView(ListAPIView):
 
     def get_queryset(self):
         festival = Festival.objects.get(name='Aeternity Universe One')
+        return festival.shops.all()
+
+
+class APIFestivalListView(ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = FestivalSerializer
+
+    def get_queryset(self):
+        return self.request.user.festivals.all()
+
+
+class APIFestivalShopListView(ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = ShopSerializer
+
+    def get_queryset(self):
+        festival = Festival.objects.get(pk=self.kwargs['pk'])
         return festival.shops.all()
 
 
@@ -45,6 +63,7 @@ def api_festivals_shops_update(request, pk_festival):
     festival = get_object_or_404(Festival, pk=pk_festival, owner=request.user)
 
     shops_data = request.data
+    shop_ids = []
 
     for shop_data in shops_data:
         shop, shop_created = Shop.objects.update_or_create(
@@ -55,6 +74,8 @@ def api_festivals_shops_update(request, pk_festival):
                 name=shop_data.get('name')
             )
         )
+        shop_ids.append(shop.id)
+
         product_ids = []
         for product_data in shop_data.get('products', []):
             product, product_created = Product.objects.update_or_create(
@@ -70,6 +91,9 @@ def api_festivals_shops_update(request, pk_festival):
 
         # Delete all products, which were not transferred
         shop.products.exclude(id__in=product_ids).delete()
+
+    # Delete all shops, which were not transferred
+    festival.shops.exclude(id__in=shop_ids).delete()
 
     return Response({'msg': 'OK'})
 

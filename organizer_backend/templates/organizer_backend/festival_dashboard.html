@@ -1,7 +1,6 @@
 {% extends 'organizer_backend/base.html' %}
 
 {% load util_filters %}
-
 {% load static %}
 
 {% block custom_styles %}
@@ -22,8 +21,8 @@
 {% endblock %}
 
 {% block content %}
+<h1>{{festival.name}}</h1>
 <div id="festival-dashboard-app">
-
   <div class="ui cards">
 	<div class="ui card">
 	  Cash: {{festival.charges.cash.total_amount|pretty_money}}

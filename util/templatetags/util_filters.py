@@ -50,14 +50,14 @@ def rg_date(val):
 def rg_date_and_time(val, verbose=False):
     if not verbose:
         if isinstance(val, datetime):
-            return val.astimezone(tz).strftime('%a, %d.%m.%Y %H:%M Uhr')
+            return val.astimezone(tz).strftime('%a, %Y-%m-%d %I:%M %p')
         if isinstance(val, date):
-            return val.strftime('%a, %d.%m.%Y %H:%M Uhr')
+            return val.strftime('%a, %Y-%m-%d %H:%M Uhr')
     else:
         if isinstance(val, datetime):
-            return val.astimezone(tz).strftime('%a, %d.%m.%Y %H:%M Uhr')
+            return val.astimezone(tz).strftime('%a, %d.%m.%Y %I:%M %p')
         if isinstance(val, date):
-            return val.strftime('%a, %d.%m.%Y %H:%M Uhr')
+            return val.strftime('%a, %Y-%m-%d %I:%M %p')
 
     return '-'
 

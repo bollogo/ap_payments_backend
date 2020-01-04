@@ -27,7 +27,7 @@ from rest_framework_jwt.views import obtain_jwt_token, verify_jwt_token
 urlpatterns = [
     path('', RedirectView.as_view(url=reverse_lazy('home'), permanent=False)),
     path('login/', auth_views.LoginView.as_view(template_name='organizer_backend/login.html'), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('logout/', auth_views.LogoutView.as_view(template_name='organizer_backend/logout.html'), name='logout'),
     
     path('admin/', admin.site.urls),
 

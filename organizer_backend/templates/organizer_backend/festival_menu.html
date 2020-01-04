@@ -1,14 +1,17 @@
 <div class="ui vertical fluid tabular menu">
   <a href="{% url 'festival_edit' pk=festival.pk %}" class="{% if active == 'shops' %}active{% endif %} item">
-	Shops
+		Shops
   </a>
   <a href="{% url 'festival_dashboard' pk=festival.pk %}" class="{% if active == 'dashboard' %}active{% endif %} item">
-	Dasboard
+		Dasboard
   </a>
-  <a href="{% url 'festival_users' pk=festival.pk %}" class="{% if active == 'users' %}active{% endif %} item">
-	Users
+  <a href="{% url 'festival_users' pk=festival.pk %}" class="{% if active == 'wristbands' %}active{% endif %} item">
+		Wristbands
   </a>
-  <a class="{% if active == 'dashboard' %}settings{% endif %} item">
-	Settings
+  <a href="{% url 'festival_distribution' pk=festival.pk %}" class="{% if active == 'distribution' %}active{% endif %} item">
+		Distribution
+  </a>
+  <a href="{% url 'festival_merchant_app' pk=festival.pk %}" class="{% if active == 'merchant_app' %}active{% endif %} item">
+		Wristband Merchant App
   </a>
 </div>

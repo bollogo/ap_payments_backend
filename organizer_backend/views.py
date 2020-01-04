@@ -31,6 +31,15 @@ class FestivalDashboardView(DetailView):
     model = Festival
 
 
+class FestivalDistributionView(DetailView):
+    template_name = 'organizer_backend/festival_distribution.html'
+    model = Festival
+
+
+class FestivalMerchantAppView(DetailView):
+    template_name = 'organizer_backend/festival_merchant_app.html'
+    model = Festival
+
 class FestivalUsersView(ListView):
     template_name = 'organizer_backend/festival_users.html'
     model = User

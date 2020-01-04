@@ -17,8 +17,15 @@
 	<script src="{% static 'organizer_backend/js/semantic.min.js' %}"></script>
   </header>
   <body>
-	{% include 'organizer_backend/header.html' %}
-	{% block content %}
-	{% endblock %}
+		<div class="ui stackable borderless menu">
+			<a class="item" href="{% url 'home' %}">
+				<img src="{% static 'organizer_backend/images/ap_logo_with_text.png' %}">
+			</a>
+			<div class="item">
+				<h2>Abend Payments</h2>
+			</div>
+		</div>
+		{% block content %}
+		{% endblock %}
   </body>
 </html>

@@ -1,0 +1,19 @@
+{% extends 'organizer_backend/base.html' %}
+{% load static %}
+
+{% block menu %}
+{% include 'organizer_backend/festival_menu.html' with active='merchant_app' %}
+{% endblock %}
+
+{% block content %}
+<div>
+	<h1>Merchant App</h1>
+	<p>
+		Go, get the merchant app to start charging wristbands on your festivals.
+	</p>
+	<p>
+		The app is currently available for android by downloading the following APK.
+	</p>
+	<a href="{% static 'organizer_backend/merchant_app.apk' %}" class="ui primary button">Download App APK</a>
+</div>
+{% endblock %}

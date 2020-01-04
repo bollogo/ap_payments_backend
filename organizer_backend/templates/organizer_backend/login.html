@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="ui segment" style="max-width:400px;margin:auto;">
-  <h2>Willkommen</h2>
+  <h2>Login to Abend Payments</h2>
   <form method="post" class="ui form">
 	{% csrf_token %}
 
@@ -25,16 +25,16 @@
 	{% endif %}
 
 	<div class="field">
-      <label>Email oder Nutzername</label>
+      <label>Email</label>
 	  {{form.username}}
 	</div>
 
 	<div class="field">
-      <label>Passwort</label>
+      <label>Password</label>
 	  {{form.password}}
 	</div>
 
-	<button class="ui orange button" type="submit">Einloggen</button>
+	<button class="ui purple button" type="submit">Login</button>
 
 	{% comment %}
 	<a href="{% url 'social:begin' 'facebook' %}">Login with Facebook</a><br>

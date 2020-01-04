@@ -1,3 +1,17 @@
-<div class="page-header">
-  <h2>Abend Payments</h2>
+{% load static %}
+
+<div class="ui stackable borderless menu">
+  <a class="item" href="{% url 'home' %}">
+		<img src="{% static 'organizer_backend/images/ap_logo_with_text.png' %}">
+  </a>
+	<div class="item">
+		<h2>Abend Payments</h2>
+	</div>
+	<div class="right menu">
+		<div class="item">
+			<a href="{% url 'logout' %}" class="">
+				Logout		  
+			</a>
+		</div>
+	</div>
 </div>

@@ -1,39 +1,38 @@
 {% extends 'organizer_backend/base.html' %}
 
+{% load util_filters %}
+
 {% block content %}
-<div class="ui items">
+<div class="ui divided items" style="padding-top:20px;">
   {% for festival in festivals %}
   <div class="item">
     <div class="content">
-	  <a href="{% url 'festival_edit' pk=festival.pk %}" class="header">{{festival.name}}</a>
-	  <div class="meta">
-        <span>Description</span>
-	  </div>
-	  <div class="description">
-        <p></p>
-	  </div>
-	  <div class="extra">
-        Additional Details
-	  </div>
+			<a href="{% url 'festival_edit' pk=festival.pk %}" class="header">{{festival.name}}</a>
+			<div class="extra">
+        {{festival.start_time|rg_date_and_time}}
+				<a href="{% url 'festival_edit' pk=festival.pk %}" class="ui right floated button">
+          more
+          <i class="right chevron icon"></i>
+        </a>
+			</div>
     </div>
   </div>
   {% empty %}
   <div class="item">
-	<div class="image">
-
-	</div>
-	<div class="content">
+		<div class="image">
+		</div>
+		<div class="content">
       <a class="header">No Festivals yet :(</a>
       <div class="description">
-		<p>
-		  Add your first Festival now!
-		</p>
+				<p>
+					Add your first Festival now!
+				</p>
       </div>
-	</div>
+		</div>
   </div>
   {% endfor %}
   <div class="extra">
-    <a href="{% url 'festival_create' %}" class="ui right floated primary button">
+    <a href="{% url 'festival_create' %}" class="ui left floated primary button">
       Add new Festival +
     </a>
   </div>

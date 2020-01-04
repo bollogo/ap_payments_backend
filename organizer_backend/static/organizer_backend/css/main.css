@@ -8,7 +8,31 @@
 	color: white;
 }
 
+.ui.stackable.menu {
+		background-color: #58026d;
+}
+.ui.stackable.menu > .item > h2 {
+		color:white;
+}
+
+.ui.stackable.menu .item a {
+		color:white;
+}
+
+.ui.stackable.menu .item a:hover {
+		opacity: 0.8;
+}
+
 .main {
 	max-width: 1300px;
 	margin:auto;
+}
+
+.ui.primary.button {
+		background-color: purple;
+}
+
+.ui.primary.button:hover {
+		background-color: purple;
+		opacity: 0.8;
 }

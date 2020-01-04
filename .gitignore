@@ -11,3 +11,4 @@ pip.freeze
 *.pyc
 __pycache__
 *.environment
+venv

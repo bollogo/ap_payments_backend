@@ -1,10 +1,14 @@
 import requests
+from aeternity.signing import Account
+from aeternity.transactions import TxSigner, TxObject, TxBuilder
 
-FAKE = True
+FAKE = False
             
 #URL_BLOCKCHAIN = '192.168.1.74:2709'
 
-URL_BLOCKCHAIN = 'https://cryptofest.prokapi.com'
+URL_BLOCKCHAIN = 'http://116.203.255.59:8000'
+
+#URL_BLOCKCHAIN = 'https://cryptofest.prokapi.com'
 
 def response_ok(response):
     return response.get('status') == 'ok'
@@ -64,6 +68,21 @@ def get_transfer_tx(caller_pubkey, receiver_pubkey, amount):
     }
     return get('get_transfer_tx', params)
 
+def sign(priv_key, data):
+    acc = Account.from_secret_key_string(priv_key)
+    tx_signer = TxSigner(acc, 'ae_uat')
+    tx_builder = TxBuilder()
+    tx = TxObject(tx=data)
+    signature = tx_signer.sign_transaction(tx, None)
+    signed = tx_builder.tx_signed([signature], tx, metadata=None)
+    return signed.tx
+
+def create_wallet():
+    acc = Account.generate()
+    pub_key = acc.get_address()
+    priv_key = acc.get_secret_key()
+    return priv_key, pub_key
+
 def broadcast_signed_tx_sync(signed_tx):
     if FAKE:
         return {'status': 'ok'}
@@ -106,6 +125,15 @@ def mint(receiver_pubkey, amount):
     }
     return post('mint', payload)
 
+def burn(receiver_pubkey, amount):
+    if FAKE:
+        return {'status': 'ok'}
+        
+    payload = {
+        'receiver_pubkey': receiver_pubkey,
+        'amount': amount
+    }
+    return post('burn', payload)
 
 def transfer_aeter(receiver_pubkey, amount):
     if FAKE:

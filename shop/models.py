@@ -143,6 +143,7 @@ class Order(BaseModel):
     wallet = models.ForeignKey(Wallet, models.DO_NOTHING, related_name='orders')
     pickup_code = models.CharField(max_length=255, blank=True, default=generate_pickup_code)
     blockchain_checked_at = models.DateTimeField(null=True, blank=True)
+    tx = models.CharField(max_length=255, blank=True)
     tx_hash = models.CharField(max_length=255, blank=True)
 
     class STATUS:
@@ -164,6 +165,23 @@ class Order(BaseModel):
     total_amount = models.BigIntegerField()
 
     objects = OrderQuerySet.as_manager()
+
+    def blockchain_tx(self):
+        return blockchain.get_transfer_tx(self.wallet.pub_key, self.shop.pub_key, self.total_amount)
+
+    def transmit_to_blockchain(self):
+        try:
+            self.tx = self.blockchain_tx()
+            self.save()
+            signed_tx = blockchain.sign(self.wallet.priv_key, self.tx)
+            resp = blockchain.broadcast_signed_tx_sync(signed_tx)
+            self.tx_hash = resp.get('tx_id')
+            self.save()
+            self.status = Order.STATUS.paid
+            self.save()
+        except:
+            self.status = Order.STATUS.error
+            self.save()
 
     def update_status_from_blockchain(self):
         if self.status != 'pending':

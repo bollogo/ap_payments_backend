@@ -15,7 +15,7 @@ from django.utils.crypto import get_random_string
 from decimal import Decimal
 from .exceptions import InvalidVoucherException, NotEnoughFunds
 from util.models import BaseModel, BaseQuerySet
-
+import django_rq
 
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None):
@@ -92,6 +92,7 @@ class Wallet(BaseModel):
     )
 
     pub_key = models.CharField(max_length=255)
+    priv_key = models.CharField(max_length=255, null=True, blank=True)
 
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
@@ -100,6 +101,16 @@ class Wallet(BaseModel):
     balance = models.BigIntegerField()
 
     objects = WalletQuerySet.as_manager()
+
+    @classmethod
+    def create(cls, user, balance=0):
+        priv_key, pub_key = blockchain.create_wallet()
+        return Wallet.objects.create(
+            pub_key=pub_key,
+            priv_key=priv_key,
+            balance=balance,
+            user=user,
+        )
 
     @classmethod
     def for_pub_key(cls, pub_key):
@@ -120,14 +131,12 @@ class Wallet(BaseModel):
     def ae_explorer_url(self):
         return 'https://testnet.explorer.aepps.com/#/account/{}'.format(self.pub_key)
 
-    def charge(self, amount_ap):
-        resp = blockchain.mint(self.pub_key, amount_ap)
-        if response_ok(resp):
-            self.balance += amount_ap
+    def sign_tx(self, pub_key, data):
+        return blockcahain.create_signed_tx(self.priv_key, self.pub_key, amount, pub_key)
 
+    def charge(self, amount_ap):
+        self.balance += amount_ap
         self.save()
-        
-        return resp
 
     def create_cash_charge(self, amount_ap):
         charge = Charge.objects.create(
@@ -137,7 +146,24 @@ class Wallet(BaseModel):
             is_paid=True
         )
 
-        return self.charge(amount_ap)
+        django_rq.enqueue(charge.transmit_to_blockchain)
+        self.charge(amount_ap)
+        return charge
+
+    def create_order_and_spend(self, order_id, shop, total_amount):
+        from shop.models import Order
+        order = Order.objects.create(
+            id=order_id,
+            shop=shop,
+            user=self.user,
+            wallet=self,
+            status=Order.STATUS.pending,
+            total_amount=total_amount,
+        )
+
+        django_rq.enqueue(order.transmit_to_blockchain)
+        self.spend(total_amount)
+        return order
 
     def sum_charges_paypal(self):
         return self.charges.filter(is_paid=True, payment_method=Charge.PAYMENT_METHOD.paypal).aggregate(Sum('amount')).get('amount__sum') or int(0)
@@ -182,6 +208,8 @@ class Wallet(BaseModel):
         amount_ap = min(self.maximum_payout(), amount_ap)
         
         payout = Payout.objects.create(wallet=self, amount=amount_ap)
+        django_rq.enqueue(payout.transmit_to_blockchain)
+        
         self.balance -= amount_ap
         self.save()
         return payout
@@ -211,8 +239,43 @@ class Payout(BaseModel):
     wallet = models.ForeignKey(Wallet, models.CASCADE, related_name='payouts')
 
     amount = models.BigIntegerField()
+    
+    # TODO: think if these status choices make sense
+    class STATUS:
+        pending = 'pending'
+        paid = 'paid'
+        ready = 'ready'
+        success = 'success'
+        error = 'error'
+
+    STATUS_CHOICES = (
+        (STATUS.pending, 'pending'),
+        (STATUS.paid, 'paid'),
+        (STATUS.ready, 'ready'),
+        (STATUS.success, 'success'),
+        (STATUS.error, 'error'),
+    )
+
+    status = models.CharField(max_length=255, choices=STATUS_CHOICES, default=STATUS.pending)
+    
 
     objects = PayoutQuerySet.as_manager()
+    
+    def transmit_to_blockchain(self):
+        try:
+            resp = blockchain.burn(self.wallet.pub_key, self.amount)
+            if response_ok(resp):
+                self.status = Charge.STATUS.success
+            else:
+                self.status = Charge.STATUS.error
+            self.save()
+            
+            return resp
+        except Exceptions as err:
+            print(err)
+            self.status = Charge.STATUS.error
+            self.save()
+
 
     @property
     def amount_euro(self):
@@ -310,7 +373,39 @@ class Charge(BaseModel):
     
     payment_method = models.CharField(choices=PAYMENT_METHOD_CHOICES, default=PAYMENT_METHOD.paypal, max_length=100)
 
+    # TODO: think if these status choices make sense
+    class STATUS:
+        pending = 'pending'
+        paid = 'paid'
+        ready = 'ready'
+        success = 'success'
+        error = 'error'
+
+    STATUS_CHOICES = (
+        (STATUS.pending, 'pending'),
+        (STATUS.paid, 'paid'),
+        (STATUS.ready, 'ready'),
+        (STATUS.success, 'success'),
+        (STATUS.error, 'error'),
+    )
+
+    status = models.CharField(max_length=255, choices=STATUS_CHOICES, default=STATUS.pending)
+
     objects = ChargeQuerySet.as_manager()
+
+    def transmit_to_blockchain(self):
+        try:
+            resp = blockchain.mint(self.wallet.pub_key, self.amount)
+            if response_ok(resp):
+                self.status = Charge.STATUS.success
+            else:
+                self.status = Charge.STATUS.error
+            self.save()
+            return resp
+        except Exception as err:
+            print(err)
+            self.status = Charge.STATUS.error
+            self.save()
 
     @property
     def amount_euro(self):

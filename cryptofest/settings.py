@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'util',
     'client',
+     'django_rq',
 ]
 
 MIDDLEWARE = [
@@ -127,6 +128,16 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'cryptofest.wsgi.application'
 
+
+RQ_QUEUES = {
+    'default': {
+        'HOST': 'localhost',
+        'PORT': 6379,
+        'DB': 0,
+        'PASSWORD': None,
+        'DEFAULT_TIMEOUT': 360,
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases

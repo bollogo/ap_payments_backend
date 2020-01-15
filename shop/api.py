@@ -182,7 +182,7 @@ def api_wristband_payout(request, token):
         amount = request.data.get('amount')
         wristband = Wristband.objects.get(token=token)
 
-        wristband.wallet.create_payout(amount)
+        payout = wristband.wallet.create_payout(amount)
         
         return Response(serialize_wristband(wristband))
 
@@ -203,18 +203,11 @@ def api_wristband_spend(request, token):
         wallet = wristband.wallet
 
         shop = Shop.objects.get(pk=shop_id)
-        order = Order.objects.create(
-            id=order_id,
+        order = wristband.wallet.create_order_and_spend(
+            order_id,
             shop=shop,
-            user=wallet.user,
-            wallet=wallet,
-            status=Order.STATUS.pending,
             total_amount=amount,
         )
-
-        wristband.wallet.spend(amount)
-        order.status = Order.STATUS.paid
-        order.save()
 
         return Response(serialize_wristband(wristband))
 
@@ -249,12 +242,7 @@ def api_wristband_activate(request, token):
         email='wristband_{}@cryptofest.net'.format(token)
     )
 
-    wallet = Wallet.objects.create(
-        pub_key='wristband_' + token,
-        balance=0,
-        user=user,
-    )
-
+    wallet = Wallet.create(user)
     wallet.charge(to_ap(2))
 
     wristband = Wristband.objects.create(

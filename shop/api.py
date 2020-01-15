@@ -232,7 +232,7 @@ def api_wristband_get(request, token):
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])    
+@permission_classes([IsAuthenticated])
 def api_wristband_activate(request, token):
     wristband = Wristband.objects.filter(token=token).first()
     if wristband:

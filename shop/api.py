@@ -160,7 +160,7 @@ def serialize_wristband(wristband):
     }
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated, IsAdminUser])
+@permission_classes([IsAuthenticated])
 def api_wristband_charge(request, token):
     try:
         amount = request.data.get('amount')
@@ -176,7 +176,7 @@ def api_wristband_charge(request, token):
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated, IsAdminUser])
+@permission_classes([IsAuthenticated])
 def api_wristband_payout(request, token):
     try:
         amount = request.data.get('amount')
@@ -192,7 +192,7 @@ def api_wristband_payout(request, token):
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated, IsAdminUser])
+@permission_classes([IsAuthenticated])
 def api_wristband_spend(request, token):
     try:
         amount = request.data.get('amount')
@@ -220,7 +220,7 @@ def api_wristband_spend(request, token):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated, IsAdminUser])
+@permission_classes([IsAuthenticated])
 def api_wristband_get(request, token):
     try:
         wristband = Wristband.objects.get(token=token)
@@ -232,7 +232,7 @@ def api_wristband_get(request, token):
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated, IsAdminUser])    
+@permission_classes([IsAuthenticated])    
 def api_wristband_activate(request, token):
     wristband = Wristband.objects.filter(token=token).first()
     if wristband:

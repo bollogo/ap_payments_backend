@@ -30,9 +30,28 @@ class Shop(BaseModel):
 
     owner = models.ForeignKey(User, models.DO_NOTHING, related_name='shops')
     festival = models.ForeignKey(Festival, models.DO_NOTHING, null=True, blank=True, related_name='shops')
-    pub_key = models.CharField(max_length=255)
+    wallet = models.ForeignKey(Wallet, models.DO_NOTHING, related_name='shops', blank=True, null=True)
 
     objects = ShopQuerySet.as_manager()
+
+    @classmethod
+    def update_or_create(self, id=None, owner=None, festival=None, defaults=None):
+        shop, created = Shop.objects.update_or_create(
+            id=id,
+            owner=owner,
+            festival=festival,
+            defaults=defaults
+        )
+
+        if created:
+            shop.wallet = Wallet.create(owner, precharge=False)
+            shop.save()
+
+        return shop, created
+
+    @property
+    def pub_key(self):
+        return self.wallet.pub_key
 
     @property
     def unfulfilled_order_count(self):
@@ -166,6 +185,10 @@ class Order(BaseModel):
 
     objects = OrderQuerySet.as_manager()
 
+    def blockchain_url(self):
+        if self.tx_hash:
+            return 'https://testnet.explorer.aepps.com/transactions/'+ self.tx_hash
+
     def blockchain_tx(self):
         return blockchain.get_transfer_tx(self.wallet.pub_key, self.shop.pub_key, self.total_amount)
 
@@ -179,7 +202,8 @@ class Order(BaseModel):
             self.save()
             self.status = Order.STATUS.paid
             self.save()
-        except:
+        except Exception as err:
+            print(err)
             self.status = Order.STATUS.error
             self.save()
 

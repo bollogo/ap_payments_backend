@@ -10,6 +10,7 @@ from .widgets import DatetimePickerWidget
 from django.urls import reverse_lazy
 from util.helper import to_ap, from_ap
 from django.shortcuts import get_object_or_404
+from .views_wristband import *
 
 
 class HomeView(TemplateView):

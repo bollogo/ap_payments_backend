@@ -1,0 +1,59 @@
+{% extends 'organizer_backend/base.html' %}
+
+{% load util_filters %}
+{% load static %}
+
+{% block menu %}
+
+{% endblock %}
+
+{% block content %}
+<h1>Wristband {{wristband.email}}</h1>
+<div>
+  <table class="ui basic celled table">
+		<tbody>
+			<tr>
+				<td>Email</td>
+				<td>{{wristband.wallet.user.email}}</td>
+			</tr>
+			<tr>
+				<td>Token</td>
+				<td>{{wristband.token}}</td>
+			</tr>
+			<tr>
+				<td>Balance</td>
+				<td><strong>{{wristband.wallet.balance|pretty_money}}</strong></td>
+			</tr>
+			<tr>
+				<td>Charges</td>
+				<td>
+					{% for charge in wristband.wallet.charges.all %}
+					{{charge.date_created|rg_date_and_time}} - {{charge.amount|pretty_money}}<br>
+					{% endfor %}
+				</td>
+			</tr>
+			<tr>
+				<td>Payouts</td>
+				<td>
+					{% for payout in wristband.wallet.payouts.all %}
+					{{payout.date_created|rg_date_and_time}} - {{payout.amount|pretty_money}}<br>
+					{% empty %}
+					-
+					{% endfor %}
+				</td>
+			</tr>
+			<tr>
+				<td>Orders</td>
+				<td>
+					{% for order in wristband.wallet.orders.all %}
+					{{order.date_created|rg_date_and_time}} - {{order.total_amount|pretty_money}}<br>
+					<a target="_blank" href="{{order.blockchain_url}}">{{order.tx_hash}}</a><br>
+					{% empty %}
+					-
+					{% endfor %}
+				</td>
+			</tr>
+		</div>
+  </div>
+</div>
+{% endblock %}

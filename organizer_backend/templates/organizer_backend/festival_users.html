@@ -38,7 +38,7 @@
 		<tbody>
 			{% for user in users %}
 			<tr>
-				<td>{{user.email}}</td>
+				<td><a href="{% url 'wristband_detail' pk=user.wallet.wristband.pk %}">{{user.email}}</a></td>
 				<td>{{user.wallet.orders.paid.count}}</td>
 				<td>{{user.wallet.charges.paid.count}}</td>
 				<td>{{user.wallet.payouts.count}}</td>

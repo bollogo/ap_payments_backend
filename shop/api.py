@@ -66,7 +66,7 @@ def api_festivals_shops_update(request, pk_festival):
     shop_ids = []
 
     for shop_data in shops_data:
-        shop, shop_created = Shop.objects.update_or_create(
+        shop, shop_created = Shop.update_or_create(
             id=shop_data.get('id'),
             owner=request.user,
             festival=festival,
@@ -243,7 +243,7 @@ def api_wristband_activate(request, token):
     )
 
     wallet = Wallet.create(user)
-    wallet.charge(to_ap(2))
+    wallet.create_cash_charge(to_ap(2))
 
     wristband = Wristband.objects.create(
         token=token,

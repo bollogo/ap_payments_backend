@@ -103,14 +103,20 @@ class Wallet(BaseModel):
     objects = WalletQuerySet.as_manager()
 
     @classmethod
-    def create(cls, user, balance=0):
+    def create(cls, user, balance=0, precharge=True):
         priv_key, pub_key = blockchain.create_wallet()
-        return Wallet.objects.create(
+        wallet = Wallet.objects.create(
             pub_key=pub_key,
             priv_key=priv_key,
             balance=balance,
             user=user,
         )
+        if precharge:
+            django_rq.enqueue(wallet.precharge_with_aeter)
+        return wallet
+
+    def precharge_with_aeter(self):
+        return blockchain.transfer_aeter(self.pub_key)
 
     @classmethod
     def for_pub_key(cls, pub_key):
@@ -119,6 +125,10 @@ class Wallet(BaseModel):
     @classmethod
     def for_pub_hash(cls, pub_hash):
         return cls.objects.get(pub_key__endswith=pub_hash)
+
+    @property
+    def wristband(self):
+        return self.wristbands.first()
 
     @property
     def pub_hash(self):
@@ -137,6 +147,9 @@ class Wallet(BaseModel):
     def charge(self, amount_ap):
         self.balance += amount_ap
         self.save()
+
+    def balance_from_blockchain(self):
+        return blockchain.get_balance(self.pub_key)
 
     def create_cash_charge(self, amount_ap):
         charge = Charge.objects.create(

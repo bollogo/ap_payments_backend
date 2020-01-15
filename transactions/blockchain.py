@@ -135,16 +135,18 @@ def burn(receiver_pubkey, amount):
     }
     return post('burn', payload)
 
-def transfer_aeter(receiver_pubkey, amount):
+def transfer_aeter(receiver_pubkey, amount=None):
     if FAKE:
         return {'status': 'ok'}
 
-    # default_amount = 0.01*e18
-        
+    if not amount:
+        amount = int(0.001*1e18)
+
     payload = {
         'receiver_pubkey': receiver_pubkey,
         'amount': amount
     }
+    
     return post('transfer_aeter', payload)
 
 

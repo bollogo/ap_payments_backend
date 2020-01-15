@@ -5,6 +5,15 @@ from django.contrib.admin.views.decorators import staff_member_required
 
 urlpatterns = [
     path(r'', login_required(HomeView.as_view()), name='home'),
+
+    ###################
+    #### Wristbands ####
+    ###################
+    path(r'wristbands/<uuid:pk>', login_required(WristbandDetailView.as_view()), name='wristband_detail'),
+
+    ###################
+    #### Festivals ####
+    ###################
     path(r'festivals/<uuid:pk>', login_required(FestivalDetailView.as_view()), name='festival_detail'),
     path(r'festivals/<uuid:pk>/edit', login_required(FestivalEditView.as_view()), name='festival_edit'),
     path(r'festivals/<uuid:pk>/dashboard', login_required(FestivalDashboardView.as_view()), name='festival_dashboard'),

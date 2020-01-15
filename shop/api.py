@@ -243,8 +243,7 @@ def api_wristband_activate(request, token):
     )
 
     wallet = Wallet.create(user)
-    wallet.create_cash_charge(to_ap(2))
-
+    
     wristband = Wristband.objects.create(
         token=token,
         wallet=wallet,

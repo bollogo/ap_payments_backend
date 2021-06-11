@@ -50,5 +50,5 @@ urllib3==1.24.1
 validators==0.13.0
 wcwidth==0.1.7
 websocket-client==0.48.0
-websockets==7.0
+websockets==9.1
 wrapt==1.11.2
